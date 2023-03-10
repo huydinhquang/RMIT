@@ -44,12 +44,6 @@ menu_mgs_list = [
 for i in menu_mgs_list:
     menu_mgs += break_line_message(i)
 
-# Print out the menu
-print(menu_mgs)
-
-option_selected = input('Choose one option: ')
-print(option_selected)
-
 # Function to convert the input value of reward program to Boolean
 def convert_answer_reward_program(is_reward_program):
     result = False
@@ -202,3 +196,46 @@ def purchase_ticket():
 
     # Print out the receipt
     print(receipt_mgs)
+
+# Function to add movies (Option 2)
+def add_movie():
+    # TBD
+    return
+
+# Function to display existing customers information (Option 3)
+def display_customer_info():
+    # TBD
+    return
+
+# Function to display existing movies information (Option 4)
+def display_movie_info():
+    # TBD
+    return
+
+# Function to print out the menu
+def print_menu():
+    print(menu_mgs)
+    selected_option = input('Choose one option: ')
+    match selected_option:
+        case '1':
+            purchase_ticket()
+        case '2':
+            add_movie()
+        case '3':
+            display_customer_info()
+        case '4':
+            display_movie_info()
+        case '0':
+            quit()
+        case _:
+            print('Something went wrong!')
+            return
+    
+    # Print out the menu after each task
+    print_menu()
+
+# Innitially, call the function to print out the menu
+print_menu()
+
+
+    
