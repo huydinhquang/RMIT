@@ -9,6 +9,7 @@ CONS_DASH = '-'
 CONS_SHARP = '*'
 CONS_TAB = '\t'
 CONS_BREAK_LINE = '\n'
+CONS_COMMA = ','
 CONS_COMMA_WITH_SPACE = ', '
 
 # Define properties
@@ -25,9 +26,14 @@ CONS_TICKET_QUANTITY_MAX = 50
 # Prepare data for menu
 sharp_mgs = CONS_SHARP * 50
 
+init_movie_list = ['Avatar', 'Titanic', 'StarWar']
+    
 def break_line_message(message):
     return ('{0}{1}').format(message, CONS_BREAK_LINE)
 
+def convert_string_to_list(string, separator):
+    return list(string.split(f'{separator}'))
+    
 # Prepare content for menu
 menu_mgs = ''
 menu_mgs += ('Welcome to the RMIT movie ticketing system!{0}').format(CONS_BREAK_LINE * 2)
@@ -69,13 +75,13 @@ def validate_predefined_value(value_list, value):
     return False
 
 # Function to enter a valid movie
-def define_movie_name(movie_list):
-    movie_list_str = CONS_COMMA_WITH_SPACE.join(movie_list)
+def define_movie_name(init_movie_list):
+    movie_list_str = CONS_COMMA_WITH_SPACE.join(init_movie_list)
     while True:
         try:
             #movie_name = input('Enter the name of the movie [enter a valid name only, e.g. {0}]:{1}'.format(movie_list_str, CONS_BREAK_LINE))
             movie_name = 'Avatar'
-            if not validate_predefined_value(movie_list, movie_name):
+            if not validate_predefined_value(init_movie_list, movie_name):
                 print('The movie is not valid. Please enter a valid movie.!')
             
             return movie_name
@@ -120,8 +126,8 @@ def define_ticket_quantity():
 def define_reward_program(is_reward_program_list):
     while True:
         try:
-            is_reward_program = input(
-                'The customer is not in the rewards program. Does the customer want to join the rewards program [enter y or n]?{0}'.format(CONS_BREAK_LINE))
+            is_reward_program = input(break_line_message(
+                'The customer is not in the rewards program. Does the customer want to join the rewards program [enter y or n]?'))
             if not validate_predefined_value(is_reward_program_list, is_reward_program):
                 print('Please only enter y or n')
                 continue
@@ -137,8 +143,7 @@ def purchase_ticket():
     customer_name = 'James'
 
     # Ask for movie name
-    movie_list = ['Avatar', 'Titanic', 'StarWar']
-    movie_name = define_movie_name(movie_list)
+    movie_name = define_movie_name(init_movie_list)
 
     # Ask for ticket type
     ticket_type_list = ['adult', 'child', 'senior', 'concession']
@@ -182,25 +187,37 @@ def purchase_ticket():
 
     # Prepare content for receipt
     receipt_mgs = ''
-    receipt_mgs += dash_mgs
-    receipt_mgs += ('Receipt of {0}{1}').format(customer_name, CONS_BREAK_LINE)
-    receipt_mgs += dash_mgs
-    receipt_mgs += ('Movie:{0}{1}{2}').format(tab_mgs_four, movie_name, CONS_BREAK_LINE)
-    receipt_mgs += ('Ticket type:{0}{1}{2}').format(tab_mgs_three, ticket_type, CONS_BREAK_LINE)
-    receipt_mgs += ('Ticket unit price:{0}{1}{2}').format(tab_mgs_twice, unit_price, CONS_BREAK_LINE)
-    receipt_mgs += ('Ticket quantity:{0}{1}{2}').format(tab_mgs_twice, ticket_quantity, CONS_BREAK_LINE)
-    receipt_mgs += dash_mgs
-    receipt_mgs += ('Discount:{0}{1}{2}').format(tab_mgs_three, discount, CONS_BREAK_LINE)
-    receipt_mgs += ('Booking fee:{0}{1}{2}').format(tab_mgs_three, booking_fee, CONS_BREAK_LINE)
-    receipt_mgs += ('Total cost:{0}{1}{2}').format(tab_mgs_three, total_cost, CONS_BREAK_LINE)
+    receipt_mgs_list = [
+        dash_mgs,
+        ('Receipt of {0}').format(customer_name),
+        dash_mgs,
+        ('Movie:{0}{1}').format(tab_mgs_four, movie_name),
+        ('Ticket type:{0}{1}').format(tab_mgs_three, ticket_type),
+        ('Ticket unit price:{0}{1}').format(tab_mgs_twice, unit_price),
+        ('Ticket quantity:{0}{1}').format(tab_mgs_twice, ticket_quantity),
+        dash_mgs,
+        ('Discount:{0}{1}').format(tab_mgs_three, discount),
+        ('Booking fee:{0}{1}').format(tab_mgs_three, booking_fee),
+        ('Total cost:{0}{1}').format(tab_mgs_three, total_cost)
+    ]
+    
+    for i in receipt_mgs_list:
+        receipt_mgs += break_line_message(i)
 
     # Print out the receipt
     print(receipt_mgs)
 
 # Function to add movies (Option 2)
 def add_movie():
-    # TBD
-    return
+    movie_list_str = input(break_line_message('Enter a list of movies [enter a valid name only, e.g. Titanic, Avenger, Frozen]:'))
+    movie_list = convert_string_to_list(movie_list_str, CONS_COMMA)
+    for i in movie_list:
+        i = i.strip() # Strip out all spaces before and after the item
+        if validate_predefined_value(init_movie_list, i):
+            print(break_line_message('{0} is an existing movie!').format(i))
+        else:
+            init_movie_list.append(i)
+    print(init_movie_list)
 
 # Function to display existing customers information (Option 3)
 def display_customer_info():
@@ -236,6 +253,3 @@ def print_menu():
 
 # Innitially, call the function to print out the menu
 print_menu()
-
-
-    
