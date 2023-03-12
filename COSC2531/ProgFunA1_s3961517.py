@@ -1,6 +1,6 @@
 ###########################################
 # Name:         Quang Huy Dinh - s3961517
-# Highest part: TBD
+# Highest part: 3
 # Problems:     TBD
 ###########################################
 
@@ -17,6 +17,7 @@ CONS_CUSTOMER_NAME = 'customer_name'
 CONS_CUSTOMER_REWARD_PROGRAM = 'reward_program'
 CONS_MOVIE_NAME = 'movie_name'
 CONS_MOVIE_SEAT = 'movie_seat'
+CONS_MOVIE_TOTAL_COST = 'movie_total_cost'
 CONS_TICKET_TYPE = 'ticket_type'
 CONS_TICKET_UNIT_PRICE = 'ticket_unit_price'
 CONS_TICKET_QUANTITY = 'ticket_quantity'
@@ -26,6 +27,7 @@ CONS_IS_REWARD_PROGRAM_YES = 'y'
 CONS_REWARD_PROGRAM_PERCENT = 20
 CONS_TICKET_QUANTITY_MIN = 0
 CONS_TICKET_QUANTITY_MAX = 50
+CONS_MOVIE_TOTAL_COST_INIT = 0
 
 # Menu
 # Prepare data for menu
@@ -34,9 +36,9 @@ dash_mgs = CONS_DASH * 50
 
 # Initially, define movies and customers
 init_movie_list = [
-        {CONS_MOVIE_NAME: 'Avatar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
-        {CONS_MOVIE_NAME: 'Titanic', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
-        {CONS_MOVIE_NAME: 'StarWar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
+        {CONS_MOVIE_NAME: 'Avatar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
+        {CONS_MOVIE_NAME: 'Titanic', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
+        {CONS_MOVIE_NAME: 'StarWar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
     ]
 
 init_customer_list = [
@@ -258,9 +260,10 @@ def purchase_ticket():
     # Calculate total price
     total_cost = ticket_cost - discount + booking_fee
 
-    # Recalculate ticket quantity of movie
+    # Recalculate ticket quantity, then update total cost of the movie
     movie = retrieve_metadata(init_movie_list, CONS_MOVIE_NAME, movie_name)
     movie[CONS_MOVIE_SEAT] -= total_ticket
+    movie[CONS_MOVIE_TOTAL_COST] += total_cost
     
     # Add or update current customer to customer list with the reward program information
     customer = retrieve_metadata(init_customer_list, CONS_CUSTOMER_NAME, customer_name)
@@ -318,7 +321,7 @@ def add_movie():
             print(break_line_message('{0} is an existing movie!').format(i))
         else:
             init_movie_list.append({
-                CONS_MOVIE_NAME: i, CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX
+                CONS_MOVIE_NAME: i, CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT
             })
 
 # Function to display existing customers information (Option 3)
@@ -333,8 +336,9 @@ def display_movie_info():
 
 # Function to display the most popular movie (Option 5)
 def display_most_popular_movie():
-    for i in init_movie_list:
-        return 0
+    seq = [x[CONS_MOVIE_TOTAL_COST] for x in init_movie_list]
+    result = max(seq)
+    print(result)
     
 # Function to display all movie record (Option 6)
 def display_movie_record():
