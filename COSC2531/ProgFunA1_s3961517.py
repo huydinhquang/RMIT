@@ -14,7 +14,9 @@ CONS_COMMA_WITH_SPACE = ', '
 
 # Define properties
 CONS_CUSTOMER_NAME = 'customer_name'
-CONS_REWARD_PROGRAM = 'reward_program'
+CONS_CUSTOMER_REWARD_PROGRAM = 'reward_program'
+CONS_MOVIE_NAME = 'movie_name'
+CONS_MOVIE_SEAT = 'movie_seat'
 
 # Define value
 CONS_IS_REWARD_PROGRAM_YES = 'y'
@@ -25,8 +27,19 @@ CONS_TICKET_QUANTITY_MAX = 50
 # Menu
 # Prepare data for menu
 sharp_mgs = CONS_SHARP * 50
+dash_mgs = CONS_DASH * 50 + CONS_BREAK_LINE
 
-init_movie_list = ['Avatar', 'Titanic', 'StarWar']
+# Initially, define movies and customers
+init_movie_list = [
+        {CONS_MOVIE_NAME: 'Avatar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
+        {CONS_MOVIE_NAME: 'Titanic', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
+        {CONS_MOVIE_NAME: 'StarWar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX},
+    ]
+
+init_customer_list = [
+        {CONS_CUSTOMER_NAME: 'Mary', CONS_CUSTOMER_REWARD_PROGRAM: True},
+        {CONS_CUSTOMER_NAME: 'James', CONS_CUSTOMER_REWARD_PROGRAM: False},
+    ]
     
 def break_line_message(message):
     return ('{0}{1}').format(message, CONS_BREAK_LINE)
@@ -57,32 +70,45 @@ def convert_answer_reward_program(is_reward_program):
         result = True
     return result
          
-# Function to check whether or not the customer is in reward program
-def check_reward_program(customer_list, customer_name):
-    for customer in customer_list:
-        for index, y in enumerate(customer):
-                if customer_name == customer[CONS_CUSTOMER_NAME]:
-                    return customer[CONS_REWARD_PROGRAM]
-
+# Function to retrieve metadata by the property name
+def retrieve_metadata(list, key, value):
+    for i in list:
+        if value == i[key]:
+            return i
+    return None
+                   
 # Function to validate whether or not the entered value is in the predefined list
-def validate_predefined_value(value_list, value):
+def validate_predefined_value(value_list, key= None, value = None):
     if not value:
         return False
     
-    for m in value_list:
-        if m == value:
-            return True
+    if key:
+        for m in value_list:
+            if m[key] == value:
+                return True
+    else:
+        for m in value_list:
+            if m == value:
+                return True
+    return False
+
+# Function to validate the available ticket quantity by the movie name
+def validate_available_ticket_quantity(movie_name, ticket_quantity):
+    movie = retrieve_metadata(init_movie_list, CONS_MOVIE_NAME, movie_name)
+    if ticket_quantity > movie[CONS_MOVIE_SEAT]:
+        return True
     return False
 
 # Function to enter a valid movie
 def define_movie_name(init_movie_list):
-    movie_list_str = CONS_COMMA_WITH_SPACE.join(init_movie_list)
+    movie_list_str = CONS_COMMA_WITH_SPACE.join([m[CONS_MOVIE_NAME] for m in init_movie_list])
+
     while True:
         try:
-            #movie_name = input('Enter the name of the movie [enter a valid name only, e.g. {0}]:{1}'.format(movie_list_str, CONS_BREAK_LINE))
-            movie_name = 'Avatar'
-            if not validate_predefined_value(init_movie_list, movie_name):
-                print('The movie is not valid. Please enter a valid movie.!')
+            movie_name = input(break_line_message('Enter the name of the movie [enter a valid name only, e.g. {0}]:').format(movie_list_str))
+            # movie_name = 'Avatar'
+            if not validate_predefined_value(init_movie_list, CONS_MOVIE_NAME, movie_name):
+                print('The movie is not valid. Please enter a valid movie!')
             
             return movie_name
         except ValueError:
@@ -93,9 +119,9 @@ def define_ticket_type(ticket_type_list):
     ticket_type_list_str = CONS_COMMA_WITH_SPACE.join(ticket_type_list)
     while True:
         try:
-            # ticket_type = input('Enter the ticket type [enter a valid type only, e.g. {0}]:{1}'.format(ticket_type_list_str, CONS_BREAK_LINE))
-            ticket_type = 'adult'
-            if not validate_predefined_value(ticket_type_list, ticket_type):
+            ticket_type = input(break_line_message('Enter the ticket type [enter a valid type only, e.g. {0}]:').format(ticket_type_list_str))
+            # ticket_type = 'adult'
+            if not validate_predefined_value(value_list = ticket_type_list, value = ticket_type):
                 print('The ticket type is not valid. Please enter a valid ticket type.')
             
             return ticket_type
@@ -103,17 +129,17 @@ def define_ticket_type(ticket_type_list):
             continue
 
 # Function to enter a valid ticket quantity
-def define_ticket_quantity():
+def define_ticket_quantity(movie_name):
     while True:
         try:
-            # ticket_quantity = int(input('Enter the ticket quantity [enter a positive integer only, e.g. 1, 2, 3]:{0}'.format(CONS_BREAK_LINE)))
-            ticket_quantity = 20
+            ticket_quantity = int(input(break_line_message('Enter the ticket quantity [enter a positive integer only, e.g. 1, 2, 3]')))
+            # ticket_quantity = 20
 
             if ticket_quantity <= CONS_TICKET_QUANTITY_MIN:
                 print('The ticket quantity is not valid. Please enter a valid ticket quantity.')
                 continue
 
-            if ticket_quantity > CONS_TICKET_QUANTITY_MAX:
+            if validate_available_ticket_quantity(movie_name, ticket_quantity):
                 print('Ticket quantity must be less than the number of available seats. Please enter a smaller ticket quantity.')
                 continue
 
@@ -128,7 +154,7 @@ def define_reward_program(is_reward_program_list):
         try:
             is_reward_program = input(break_line_message(
                 'The customer is not in the rewards program. Does the customer want to join the rewards program [enter y or n]?'))
-            if not validate_predefined_value(is_reward_program_list, is_reward_program):
+            if not validate_predefined_value(value_list = is_reward_program_list, value = is_reward_program):
                 print('Please only enter y or n')
                 continue
             
@@ -138,9 +164,9 @@ def define_reward_program(is_reward_program_list):
 
 # Function to purchase a ticket (Option 1)
 def purchase_ticket():
-    # # Ask for customer name
-    #customer_name = input('Enter the name of the customer [e.g. Huy]:{0}'.format(CONS_BREAK_LINE))
-    customer_name = 'James'
+    # Ask for customer name
+    customer_name = input(break_line_message('Enter the name of the customer [e.g. Huy]'))
+    # customer_name = 'James'
 
     # Ask for movie name
     movie_name = define_movie_name(init_movie_list)
@@ -150,18 +176,18 @@ def purchase_ticket():
     ticket_type = define_ticket_type(ticket_type_list)
 
     # Ask for ticket quantity
-    ticket_quantity = define_ticket_quantity()
-
-    customer_list = [
-        {CONS_CUSTOMER_NAME: 'Mary', CONS_REWARD_PROGRAM: True},
-        {CONS_CUSTOMER_NAME: 'James', CONS_REWARD_PROGRAM: False},
-    ]
+    ticket_quantity = define_ticket_quantity(movie_name)
 
     # Ask for joining reward program
     is_reward_program_list = ['y', 'n']
-    is_reward_program = check_reward_program(customer_list, customer_name)
+    customer = retrieve_metadata(init_customer_list, CONS_CUSTOMER_NAME, customer_name)
+    is_reward_program = False
+    if customer:
+        is_reward_program = customer[CONS_CUSTOMER_REWARD_PROGRAM]
     if not is_reward_program:
         is_reward_program = define_reward_program(is_reward_program_list)
+        if is_reward_program:
+            print(break_line_message('Successfully add the customer to the rewards program.'))
 
     # Define list of unit price based on ticket type
     unit_price_list = {'adult': 25.0, 'child': 19.5, 'senior': 17.0, 'student': 20.5, 'concession': 20.5}
@@ -179,8 +205,20 @@ def purchase_ticket():
     # Calculate total price
     total_cost = ticket_cost - discount + booking_fee
 
+    # Recalculate ticket quantity of movie
+    movie = retrieve_metadata(init_movie_list, CONS_MOVIE_NAME, movie_name)
+    movie[CONS_MOVIE_SEAT] -= ticket_quantity
+    
+    # Add or update current customer to customer list with the reward program information
+    customer = retrieve_metadata(init_customer_list, CONS_CUSTOMER_NAME, customer_name)
+    if customer:
+        customer[CONS_CUSTOMER_REWARD_PROGRAM] = is_reward_program
+    else:
+        init_customer_list.append({
+            CONS_CUSTOMER_NAME: customer_name, CONS_CUSTOMER_REWARD_PROGRAM: is_reward_program
+        })
+
     # Prepare data for receipt
-    dash_mgs = CONS_DASH * 50 + CONS_BREAK_LINE
     tab_mgs_twice = CONS_TAB * 2
     tab_mgs_three = CONS_TAB * 3
     tab_mgs_four = CONS_TAB * 4
@@ -213,21 +251,23 @@ def add_movie():
     movie_list = convert_string_to_list(movie_list_str, CONS_COMMA)
     for i in movie_list:
         i = i.strip() # Strip out all spaces before and after the item
-        if validate_predefined_value(init_movie_list, i):
+        if validate_predefined_value(init_movie_list, CONS_MOVIE_NAME, i):
             print(break_line_message('{0} is an existing movie!').format(i))
         else:
-            init_movie_list.append(i)
-    print(init_movie_list)
+            init_movie_list.append({
+                CONS_MOVIE_NAME: i, CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX
+            })
+    #print(init_movie_list)
 
 # Function to display existing customers information (Option 3)
 def display_customer_info():
-    # TBD
-    return
+    for i in init_customer_list:
+        print(('Customer name: {0} | reward program: {1}').format(i[CONS_CUSTOMER_NAME], i[CONS_CUSTOMER_REWARD_PROGRAM]))
 
 # Function to display existing movies information (Option 4)
 def display_movie_info():
-    # TBD
-    return
+    for i in init_movie_list:
+        print(('Movie name: {0} | available seat: {1}').format(i[CONS_MOVIE_NAME], i[CONS_MOVIE_SEAT]))
 
 # Function to print out the menu
 def print_menu():
@@ -247,7 +287,9 @@ def print_menu():
         case _:
             print('Something went wrong!')
             return
-    
+    # Print separator as the end of the current task
+    print(dash_mgs)
+
     # Print out the menu after each task
     print_menu()
 
