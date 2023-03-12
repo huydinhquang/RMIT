@@ -25,7 +25,7 @@ CONS_TICKET_TYPE = 'ticket_type'
 CONS_TICKET_UNIT_PRICE = 'ticket_unit_price'
 CONS_TICKET_QUANTITY = 'ticket_quantity'
 
-# Define value
+# Define values
 CONS_IS_REWARD_PROGRAM_YES = 'y'
 CONS_REWARD_PROGRAM_PERCENT = 20
 CONS_TICKET_QUANTITY_MIN = 0
