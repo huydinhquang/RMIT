@@ -1,8 +1,10 @@
-###########################################
-# Name:         Quang Huy Dinh - s3961517
-# Highest part: 3
-# Problems:     TBD
-###########################################
+#################################################
+# Name:         Quang Huy Dinh - s3961517       #
+# Highest part: 3.3                             #
+# Problems:     No                              #
+#                - Tested OK on Python v3.10.9  #
+#                - Please run on the same env   #
+#################################################
 
 # Define constants
 CONS_DASH = '-'
@@ -18,6 +20,7 @@ CONS_CUSTOMER_REWARD_PROGRAM = 'reward_program'
 CONS_MOVIE_NAME = 'movie_name'
 CONS_MOVIE_SEAT = 'movie_seat'
 CONS_MOVIE_TOTAL_COST = 'movie_total_cost'
+CONS_MOVIE_HEADER_REVENUE = 'Revenue'
 CONS_TICKET_TYPE = 'ticket_type'
 CONS_TICKET_UNIT_PRICE = 'ticket_unit_price'
 CONS_TICKET_QUANTITY = 'ticket_quantity'
@@ -28,6 +31,16 @@ CONS_REWARD_PROGRAM_PERCENT = 20
 CONS_TICKET_QUANTITY_MIN = 0
 CONS_TICKET_QUANTITY_MAX = 50
 CONS_MOVIE_TOTAL_COST_INIT = 0
+CONS_TICKET_TYPE_ADULT = 'adult'
+CONS_TICKET_TYPE_CHILD = 'child'
+CONS_TICKET_TYPE_SENIOR = 'senior'
+CONS_TICKET_TYPE_STUDENT = 'student'
+CONS_TICKET_TYPE_CONCESSION = 'concession'
+CONS_EMPTY_STR = ''
+CONS_RECEIPT_CELL_FORMAT = '{:<30}{:>20}'
+CONS_MOVIE_RECORD_HEADER_FORMAT = '{:^10}'
+CONS_MOVIE_RECORD_CELL_FORMAT = '{:^10}'
+CONS_MOVIE_RECORD_FIRST_CELL_FORMAT = '{:<10}'
 
 # Menu
 # Prepare data for menu
@@ -36,17 +49,50 @@ dash_mgs = CONS_DASH * 50
 
 # Initially, define movies and customers
 init_movie_list = [
-        {CONS_MOVIE_NAME: 'Avatar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
-        {CONS_MOVIE_NAME: 'Titanic', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
-        {CONS_MOVIE_NAME: 'StarWar', CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT},
-    ]
+    {
+        CONS_MOVIE_NAME: 'Avatar',
+        CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX,
+        CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT,
+        CONS_TICKET_TYPE_ADULT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CHILD: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_SENIOR: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_STUDENT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CONCESSION: CONS_TICKET_QUANTITY_MIN,
+    },
+    {
+        CONS_MOVIE_NAME: 'Titanic', 
+        CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX,
+        CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT,
+        CONS_TICKET_TYPE_ADULT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CHILD: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_SENIOR: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_STUDENT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CONCESSION: CONS_TICKET_QUANTITY_MIN,
+    },
+    {
+        CONS_MOVIE_NAME: 'StarWar', 
+        CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX,
+        CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT,
+        CONS_TICKET_TYPE_ADULT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CHILD: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_SENIOR: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_STUDENT: CONS_TICKET_QUANTITY_MIN,
+        CONS_TICKET_TYPE_CONCESSION: CONS_TICKET_QUANTITY_MIN,
+    },
+]
 
 init_customer_list = [
         {CONS_CUSTOMER_NAME: 'Mary', CONS_CUSTOMER_REWARD_PROGRAM: True},
         {CONS_CUSTOMER_NAME: 'James', CONS_CUSTOMER_REWARD_PROGRAM: False},
     ]
 
-init_ticket_type_list = ['adult', 'child', 'senior', 'concession']
+init_ticket_type_list = [
+    CONS_TICKET_TYPE_ADULT,
+    CONS_TICKET_TYPE_CHILD,
+    CONS_TICKET_TYPE_SENIOR,
+    CONS_TICKET_TYPE_STUDENT,
+    CONS_TICKET_TYPE_CONCESSION
+]
 
 def break_line_message(message):
     return ('{0}{1}').format(message, CONS_BREAK_LINE)
@@ -209,6 +255,23 @@ def define_reward_program(is_reward_program_list):
         except ValueError:
             continue
 
+# Function to update the ticket quantity regarding the ticket type based on the movie
+def update_movie_ticket_quantity(movie, ticket_type, ticket_quantity):
+    match ticket_type:
+        case 'adult':
+            movie[CONS_TICKET_TYPE_ADULT] += ticket_quantity
+        case 'child':
+            movie[CONS_TICKET_TYPE_CHILD] += ticket_quantity
+        case 'senior':
+            movie[CONS_TICKET_TYPE_SENIOR] += ticket_quantity
+        case 'student':
+            movie[CONS_TICKET_TYPE_STUDENT] += ticket_quantity
+        case 'concession':
+            movie[CONS_TICKET_TYPE_CONCESSION] += ticket_quantity
+        case _:
+            print('Something went wrong!')
+            return
+
 # Function to purchase a ticket (Option 1)
 def purchase_ticket():
     # Ask for customer name
@@ -236,19 +299,30 @@ def purchase_ticket():
             print(break_line_message('Successfully add the customer to the rewards program.'))
 
     # Define list of unit price based on ticket type
-    unit_price_list = {'adult': 25.0, 'child': 19.5, 'senior': 17.0, 'student': 20.5, 'concession': 20.5}
+    unit_price_list = {
+        CONS_TICKET_TYPE_ADULT: 25.0,
+        CONS_TICKET_TYPE_CHILD: 19.5,
+        CONS_TICKET_TYPE_SENIOR: 17.0,
+        CONS_TICKET_TYPE_STUDENT: 20.5,
+        CONS_TICKET_TYPE_CONCESSION: 20.5
+    }
+
+    # Retrieve movie metadata by movie name
+    movie = retrieve_metadata(init_movie_list, CONS_MOVIE_NAME, movie_name)
 
     # Calculate ticket fees and booking fees
     ticket_cost = 0
     ticket_list = []
     for idx, i in enumerate(ticket_type_list):
         unit_price = unit_price_list[i]
-        ticket_cost += (ticket_quantity_list[idx] * unit_price)
+        ticket_quantity = ticket_quantity_list[idx]
+        ticket_cost += (ticket_quantity * unit_price)
         ticket_list.append({
             CONS_TICKET_TYPE: i,
             CONS_TICKET_UNIT_PRICE: unit_price,
             CONS_TICKET_QUANTITY: ticket_quantity_list[idx]
         })
+        update_movie_ticket_quantity(movie, i, ticket_quantity)
 
     booking_fee = total_ticket * 2
     
@@ -261,7 +335,6 @@ def purchase_ticket():
     total_cost = ticket_cost - discount + booking_fee
 
     # Recalculate ticket quantity, then update total cost of the movie
-    movie = retrieve_metadata(init_movie_list, CONS_MOVIE_NAME, movie_name)
     movie[CONS_MOVIE_SEAT] -= total_ticket
     movie[CONS_MOVIE_TOTAL_COST] += total_cost
     
@@ -274,34 +347,29 @@ def purchase_ticket():
             CONS_CUSTOMER_NAME: customer_name, CONS_CUSTOMER_REWARD_PROGRAM: is_reward_program
         })
 
-    # Prepare data for receipt
-    tab_mgs_twice = CONS_TAB * 2
-    tab_mgs_three = CONS_TAB * 3
-    tab_mgs_four = CONS_TAB * 4
-
     # Prepare content for receipt
     receipt_mgs = ''
     receipt_mgs_list = [
         dash_mgs,
         ('Receipt of {0}').format(customer_name),
         dash_mgs,
-        ('Movie:{0}{1}').format(tab_mgs_four, movie_name)
+        CONS_RECEIPT_CELL_FORMAT.format('Movie:', movie_name)
     ]
     
     # Generate each ticket (with type, unit price and quantity) in the ticket list by iterating
     for i in ticket_list:
         receipt_mgs_list.extend([
-            ('Ticket type:{0}{1}').format(tab_mgs_three, i[CONS_TICKET_TYPE]),
-            ('Ticket unit price:{0}{1}').format(tab_mgs_twice, i[CONS_TICKET_UNIT_PRICE]),
-            ('Ticket quantity:{0}{1}').format(tab_mgs_twice, i[CONS_TICKET_QUANTITY])
+            CONS_RECEIPT_CELL_FORMAT.format('Ticket type:', i[CONS_TICKET_TYPE]),
+            CONS_RECEIPT_CELL_FORMAT.format('Ticket unit price:', i[CONS_TICKET_UNIT_PRICE]),
+            CONS_RECEIPT_CELL_FORMAT.format('Ticket quantity:', i[CONS_TICKET_QUANTITY])
         ])
     
     # Extend receipt with the discount, booking fee and total cost
     receipt_mgs_list.extend([
         dash_mgs,
-        ('Discount:{0}{1}').format(tab_mgs_three, discount),
-        ('Booking fee:{0}{1}').format(tab_mgs_three, booking_fee),
-        ('Total cost:{0}{1}').format(tab_mgs_three, total_cost)
+        CONS_RECEIPT_CELL_FORMAT.format('Discount:', discount),
+        CONS_RECEIPT_CELL_FORMAT.format('Booking fee:', booking_fee),
+        CONS_RECEIPT_CELL_FORMAT.format('Total cost:', total_cost)
     ])
     
     for i in receipt_mgs_list:
@@ -321,7 +389,14 @@ def add_movie():
             print(break_line_message('{0} is an existing movie!').format(i))
         else:
             init_movie_list.append({
-                CONS_MOVIE_NAME: i, CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX, CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT
+                CONS_MOVIE_NAME: i,
+                CONS_MOVIE_SEAT: CONS_TICKET_QUANTITY_MAX,
+                CONS_MOVIE_TOTAL_COST: CONS_MOVIE_TOTAL_COST_INIT,
+                CONS_TICKET_TYPE_ADULT: CONS_TICKET_QUANTITY_MIN,
+                CONS_TICKET_TYPE_CHILD: CONS_TICKET_QUANTITY_MIN,
+                CONS_TICKET_TYPE_SENIOR: CONS_TICKET_QUANTITY_MIN,
+                CONS_TICKET_TYPE_STUDENT: CONS_TICKET_QUANTITY_MIN,
+                CONS_TICKET_TYPE_CONCESSION: CONS_TICKET_QUANTITY_MIN,
             })
 
 # Function to display existing customers information (Option 3)
@@ -336,14 +411,26 @@ def display_movie_info():
 
 # Function to display the most popular movie (Option 5)
 def display_most_popular_movie():
-    seq = [x[CONS_MOVIE_TOTAL_COST] for x in init_movie_list]
-    result = max(seq)
-    print(result)
+    movie_total_cost_max = max(init_movie_list, key=lambda x:x[CONS_MOVIE_TOTAL_COST])
+    print(('Movie name: {0} | total cost purchased: {1}').format(movie_total_cost_max[CONS_MOVIE_NAME], movie_total_cost_max[CONS_MOVIE_TOTAL_COST]))
     
 # Function to display all movie record (Option 6)
 def display_movie_record():
-    for i in init_movie_list:
-        return 0
+    # Generate header with ticket type & 'Revenue'
+    movie_record_mgs = f'{CONS_MOVIE_RECORD_HEADER_FORMAT.format(CONS_EMPTY_STR)}'
+    for i in init_ticket_type_list:
+        movie_record_mgs += f'{CONS_MOVIE_RECORD_HEADER_FORMAT.format(i)}'
+    movie_record_mgs += break_line_message(f'{CONS_MOVIE_RECORD_HEADER_FORMAT.format(CONS_MOVIE_HEADER_REVENUE)}')
+    
+    # Generate movie name with ticket quantity corresponding to ticket type and revenue in the header
+    for movie in init_movie_list:
+        movie_record_mgs += f'{CONS_MOVIE_RECORD_FIRST_CELL_FORMAT.format(movie[CONS_MOVIE_NAME])}'
+        for ticket_type in init_ticket_type_list:
+            movie_record_mgs += f'{CONS_MOVIE_RECORD_CELL_FORMAT.format(movie[ticket_type])}'
+        movie_record_mgs += break_line_message(f'{CONS_MOVIE_RECORD_CELL_FORMAT.format(movie[CONS_MOVIE_TOTAL_COST])}')
+
+    # Print out all movie records
+    print(movie_record_mgs)
 
 # Function to print out the menu
 def print_menu():
